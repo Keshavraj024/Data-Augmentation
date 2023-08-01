@@ -1,53 +1,61 @@
-"""
-Program for Data Augmentation
-"""
-# Import the necessary modules
 import numpy as np
-from keras.preprocessing.image import load_img
-from keras.preprocessing.image import img_to_array
-from keras.preprocessing.image import ImageDataGenerator
-import matplotlib.pyplot as plt
-from PIL import Image
-import os
+from keras.preprocessing.image import load_img, img_to_array, ImageDataGenerator
 from tqdm import tqdm
+from pathlib import Path
 
-class data_augmentation:
-	def __init__(self,batch,img,num_images):
-		self.path = os.getcwd()
-		self.i = 1
-		self.batch = batch
-		self.img = img
-		self.num_images = num_images
 
-	def augmentaion(self):
-		# Load the image
-		img = load_img(self.img)
-		img = img_to_array(img)
-		img = np.expand_dims(img,0)
-		
-		# Create a datagen object
-		datagen = ImageDataGenerator(vertical_flip=True,
-							horizontal_flip = True,
-							brightness_range=[0.7,1.0],
-							rotation_range = 135,
-							zoom_range=[0.2,1.0],
-							width_shift_range=0.2,
-							height_shift_range=0.2
-							)
+class DataAugmentation:
+    def __init__(self, batch: int, img_path: str, num_images: int, save_dir: str):
+        """Data Augmentation class.
 
-		#Loop and save the image
-		for batch in tqdm(datagen.flow(img,batch_size = self.batch,save_to_dir=self.path+'/Augmented_data',
-									save_prefix='image',save_format='jpeg')):
-			if self.i > self.num_images:
-				break
-			self.i += 1
+		Args:
+			batch (int): Number of images to generate in each batch
+			img_path (str): File path of the input image
+			num_images (int): Total number of augmented images to generate
+			save_dir (str): Directory to save the augmented images
+		"""
+        self.batch = batch
+        self.img_path = img_path
+        self.num_images = num_images
+        self.save_dir = save_dir
+        self.generate_augmented_images()
+
+    def generate_augmented_images(self) -> None:
+        """
+        Generate augmented images and save them to the specified directory.
+        """
+        img = load_img(self.img_path)
+        img = img_to_array(img)
+        img = np.expand_dims(img, 0)
+
+        path = Path(self.save_dir)
+        if not path.exists():
+            path.mkdir(parents=True, exist_ok=True)
+
+        datagen = ImageDataGenerator(
+            vertical_flip=True,
+            horizontal_flip=True,
+            brightness_range=[0.7, 1.0],
+            rotation_range=135,
+            zoom_range=[0.2, 0.7],
+            width_shift_range=0.2,
+            height_shift_range=0.2,
+        )
+
+        image_count = 0
+        for _ in tqdm(
+            datagen.flow(
+                img,
+                batch_size=self.batch,
+                save_to_dir=self.save_dir,
+                save_prefix="image",
+                save_format="jpeg",
+            )
+        ):
+            image_count += 1
+            if image_count >= self.num_images:
+                break
+
 
 if __name__ == "__main__":
-	obj = data_augmentation(1,'Image/dog.jpg',20)
-	obj.augmentaion()
-			
-		
-
-	
-
-
+    DataAugmentation(batch=1, img_path="Image/dog.jpg", num_images=2, save_dir="Augmented_Data")
