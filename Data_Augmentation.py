@@ -58,4 +58,4 @@ class DataAugmentation:
 
 
 if __name__ == "__main__":
-    DataAugmentation(batch=1, img_path="Image/dog.jpg", num_images=2, save_dir="Augmented_Data")
+    DataAugmentation(batch=1, img_path="Image/ship.jpg", num_images=2, save_dir="Augmented_Data")
